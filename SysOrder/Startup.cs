@@ -53,6 +53,7 @@ namespace SysOrder
 
             string connectionString = Configuration.GetConnectionString("default");
             services.AddScoped<IDbConnector>(db => new SqlConnector(connectionString));
+            services.SwaggerConfiguration();
 
             services.RegisterIoC();
         }
@@ -60,6 +61,13 @@ namespace SysOrder
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseSwagger();
+            app.UseSwaggerUI(setup =>
+            {
+                setup.RoutePrefix = "swagger";
+                setup.SwaggerEndpoint("/swagger/v1/swagger.json", "Api Documentation");
+            });
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
