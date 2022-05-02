@@ -16,24 +16,18 @@ namespace Order.Domain.Services
 
         public ClientService(IUnitOfWork clientUOW,
                              ITimeProvider timeProvider,
-                             IGenerators generators)
+                             IGenerators generators,
+                             IClientRepository clientRepository)
         {
-            _clientUOW = _clientUOW;
+            _clientUOW = clientUOW;
             _timeProvider = timeProvider;
             _generators = generators;
+            _clientRepository = clientRepository;
         }
 
         private readonly ITimeProvider _timeProvider;
         private readonly IGenerators _generators;
-        public ClientService(IClientRepository clientRepository, 
-                             ITimeProvider timeProvider, 
-                             IGenerators generators)
-        {
-            _clientRepository = clientRepository;
-            _timeProvider = timeProvider;
-            _generators = generators;
-        }
-
+       
         public async Task<Response> CreateAsync(ClientModel client)
         {
             var response = new Response();

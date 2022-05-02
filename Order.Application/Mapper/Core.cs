@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Order.Application.DataContract.Request.Client;
+using Order.Application.DataContract.Response.Client;
 using Order.Application.DataContracts.Request.Client;
 using Order.Domain.Models;
 
@@ -14,7 +16,12 @@ namespace Order.Application.Mapper
         private void ClientMap()
         {
             CreateMap<CreateClientRequest, ClientModel>();
+            CreateMap<UpdateClientRequest, ClientModel>();
+
             CreateMap<ClientModel, CreateClientResponse>();
+            CreateMap<ClientModel, ClientResponse>();
+
+
         }
     }
 }

@@ -1,16 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Order.Application.DataContracts.Request.Client;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Order.Application.DataContract.Request.Client;
 using Order.Application.Interfaces;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-
-namespace SysOrder.Api.Controllers
+namespace Order.Api.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/client")]
     [ApiController]
+   // [Authorize]
     public class ClientController : ControllerBase
     {
         private readonly IClientApplication _clientApplication;
@@ -21,17 +20,33 @@ namespace SysOrder.Api.Controllers
         }
 
         // GET: api/<ClientController>
+        /// <summary>
+        /// Get all clients 
+        /// </summary>
+        /// <param name="clientid"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
         [HttpGet]
-        public IEnumerable<string> Get()
+        public async Task<ActionResult> Get([FromQuery] string clientid, [FromQuery] string name)
         {
-            return new string[] { "value1", "value2" };
+            var response = await _clientApplication.ListByFilterAsync(clientid, name);
+
+            if (response.Report.Any())
+                return UnprocessableEntity(response.Report);
+
+            return Ok(response);
         }
 
         // GET api/<ClientController>/5
         [HttpGet("{id}")]
-        public string Get(int id)
+        public async Task<ActionResult> Get(string id)
         {
-            return "value";
+            var response = await _clientApplication.GetByIdAsync(id);
+
+            if (response.Report.Any())
+                return UnprocessableEntity(response.Report);
+
+            return Ok(response);
         }
 
         // POST api/<ClientController>
@@ -48,14 +63,26 @@ namespace SysOrder.Api.Controllers
 
         // PUT api/<ClientController>/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        public async Task<ActionResult> Put(int id, [FromBody] UpdateClientRequest request)
         {
+            var response = await _clientApplication.UpdateAsync(request);
+
+            if (response.Report.Any())
+                return UnprocessableEntity(response.Report);
+
+            return Ok(response);
         }
 
         // DELETE api/<ClientController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public async Task<ActionResult> Delete(string id)
         {
+            var response = await _clientApplication.DeleteAsync(id);
+
+            if (response.Report.Any())
+                return UnprocessableEntity(response.Report);
+
+            return Ok(response);
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace Order.Application.DataContracts.Request.Client
+﻿namespace Order.Application.DataContract.Request.Client
 {
     public sealed class CreateClientRequest
     {

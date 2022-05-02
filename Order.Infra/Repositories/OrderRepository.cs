@@ -115,8 +115,8 @@ namespace Order.Infra.Repositories
         public async Task<OrderModel> GetByIdAsync(string orderId)
         {
             string sql = $"{baseSql} AND o.Id = @Id";
-
-            var order = await _dbConnector.dbConnection.QueryAsync<OrderModel, ClientModel, UserModel, OrderModel>(
+             
+            var order = await _dbConnector.dbConnection.QueryAsync<OrderModel, ClientModel, UserModel, OrderModel>(   
                 sql: sql,
                 map: (ord, client, user) =>
                 {

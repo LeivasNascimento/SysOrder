@@ -1,5 +1,6 @@
 ﻿using Order.Domain.Interfaces.Repositories.DataConnector;
 using System.Data;
+using System.Data.SqlClient;
 
 namespace Order.Infra.DataConnector
 {//nessa camada de Infra se pode implementar com qualquer banco de dados. Pode-se mudar a qualquer momento sem afetar as outras camadas do projeto
@@ -11,7 +12,8 @@ namespace Order.Infra.DataConnector
 
         public SqlConnector(string connectionString)
         {
-
+            dbConnection = SqlClientFactory.Instance.CreateConnection();
+            dbConnection.ConnectionString = connectionString;
         }
         public IDbConnection dbConnection { get;  set; }
 
@@ -19,12 +21,23 @@ namespace Order.Infra.DataConnector
 
         public IDbTransaction BeginTransaction(IsolationLevel isolation)
         {
-            throw new System.NotImplementedException();
+            if (dbTransaction != null)
+            {
+                return dbTransaction;
+            }
+
+            if (dbConnection.State == ConnectionState.Closed)
+            {
+                dbConnection.Open();
+            }
+
+            return (dbTransaction = dbConnection.BeginTransaction(isolation));
         }
 
         public void Dispose()
         {
-            throw new System.NotImplementedException();
+            dbConnection?.Dispose();
+            dbTransaction?.Dispose();
         }
     }
 }
