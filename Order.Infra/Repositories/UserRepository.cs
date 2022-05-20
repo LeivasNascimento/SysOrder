@@ -21,12 +21,12 @@ namespace Order.Infra.Repositories
                                       ,[Login]
                                       ,[PasswordHash]
                                       ,[CreatedAt]
-                                  FROM [dbo].[User]
+                                  FROM [dbo].[Users]
                                   WHERE 1 = 1 ";
 
         public async Task CreateAsync(UserModel user)
         {
-            string sql = @"INSERT INTO [dbo].[User]
+            string sql = @"INSERT INTO [dbo].[Users]
                                 ([Id]
                                 ,[Name]
                                 ,[Login]
@@ -50,7 +50,7 @@ namespace Order.Infra.Repositories
         }
         public async Task UpdateAsync(UserModel user)
         {
-            string sql = @"UPDATE [dbo].[User]
+            string sql = @"UPDATE [dbo].[Users]
                              SET [Name] = @Name
                                 ,[Login] = @Login
                                 ,[PasswordHash] = @PasswordHash
@@ -66,7 +66,7 @@ namespace Order.Infra.Repositories
         }
         public async Task DeleteAsync(string userId)
         {
-            string sql = $"DELETE FROM [dbo].[User] WHERE id = @id";
+            string sql = $"DELETE FROM [dbo].[Users] WHERE id = @id";
 
             await _dbConnector.dbConnection.ExecuteAsync(sql, new { Id = userId }, _dbConnector.dbTransaction);
         }
@@ -80,7 +80,7 @@ namespace Order.Infra.Repositories
         }
         public async Task<bool> ExistsByLoginAsync(string login)
         {
-            string sql = $"SELECT 1 FROM [User] WHERE Login = @Login ";
+            string sql = $"SELECT 1 FROM [Users] WHERE Login = @Login ";
                 
             var users = await _dbConnector.dbConnection.QueryAsync<bool>(sql, new { Login = login }, _dbConnector.dbTransaction);
 
