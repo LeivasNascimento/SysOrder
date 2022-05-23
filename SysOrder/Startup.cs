@@ -15,6 +15,7 @@ using SysOrder.Api.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace SysOrder
@@ -34,6 +35,12 @@ namespace SysOrder
             services.AddAutoMapper(typeof(Core));
             services.AddControllers();
 
+            var authSettingsSection = Configuration.GetSection("AuthSettings");
+            services.Configure<AuthSettings>(authSettingsSection);
+
+            var authSettings = authSettingsSection.Get<AuthSettings>();
+            SymmetricSecurityKey key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(authSettings.Secret));
+
             services.AddAuthentication(x =>
             {
                 x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -49,13 +56,32 @@ namespace SysOrder
 
                     return JwtBearerDefaults.AuthenticationScheme;
                 };
+            }).AddJwtBearer(x =>
+            {
+                x.TokenValidationParameters = new TokenValidationParameters()
+                {
+                    ValidateIssuer = true,
+                    ValidIssuer = "programevc",
+
+                    ValidateAudience = false,
+
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = key,
+
+                    // Verify if token is valid
+                    ValidateLifetime = true,
+                    RequireExpirationTime = true,
+
+                };
+
             });
+
 
             string connectionString = Configuration.GetConnectionString("default");
             services.AddScoped<IDbConnector>(db => new SqlConnector(connectionString));
-            services.SwaggerConfiguration();
 
             services.RegisterIoC();
+            services.SwaggerConfiguration();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -76,6 +102,8 @@ namespace SysOrder
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            app.UseAuthentication();
 
             app.UseAuthorization();
 

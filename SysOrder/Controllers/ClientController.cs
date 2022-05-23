@@ -9,7 +9,7 @@ namespace Order.Api.Controllers
 {
     [Route("api/client")]
     [ApiController]
-   // [Authorize]
+    [Authorize]
     public class ClientController : ControllerBase
     {
         private readonly IClientApplication _clientApplication;

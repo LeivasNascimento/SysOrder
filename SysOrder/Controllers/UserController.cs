@@ -11,7 +11,7 @@ namespace Order.Api.Controllers
 {
     [Route("api/user")]
     [ApiController]
-    //[Authorize]
+    [Authorize]
     public class UserController : ControllerBase
     {
         private readonly IUserApplication _UserApplication;
@@ -19,7 +19,7 @@ namespace Order.Api.Controllers
         public UserController(IUserApplication UserApplication)
         {
             _UserApplication = UserApplication;
-        }
+        } 
 
         [HttpGet]
         public async Task<ActionResult> Get([FromQuery] string userId, [FromQuery] string name)
@@ -42,6 +42,7 @@ namespace Order.Api.Controllers
         // POST api/<UserController>
         [HttpPost]
         [AllowAnonymous]
+
         public async Task<ActionResult> Post([FromBody] CreateUserRequest request)
         {
             var response = await _UserApplication.CreateAsync(request);

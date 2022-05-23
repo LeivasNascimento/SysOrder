@@ -50,8 +50,6 @@ namespace Order.Application.Security
             };
 
             return Task.FromResult(response);
-            return null;
-
         }
     }
 }

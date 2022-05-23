@@ -11,7 +11,7 @@ namespace Order.Api.Controllers
 {
     [Route("api/order")]
     [ApiController]
-    //[Authorize]
+    [Authorize]
     public class OrderController : ControllerBase
     {
         private readonly IOrderApplication _OrderApplication;
