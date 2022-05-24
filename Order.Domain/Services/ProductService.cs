@@ -11,16 +11,16 @@ namespace Order.Domain.Services
 {
     public class ProductService : IProductService
     {
-        private readonly IProductRepository _productRepository;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly ITimeProvider _timeProvider;
         private readonly IGenerators _generators;
-        public ProductService(IProductRepository productRepository, 
-                              ITimeProvider timeProvider, 
-                              IGenerators generators)
+        public ProductService(
+                              ITimeProvider timeProvider,
+                              IGenerators generators, IUnitOfWork unitOfWork)
         {
-            _productRepository = productRepository;
             _timeProvider = timeProvider;
             _generators = generators;
+            _unitOfWork = unitOfWork;
         }
         public async Task<Response> CreateAsync(ProductModel product)
         {
@@ -34,7 +34,7 @@ namespace Order.Domain.Services
 
             product.Id = _generators.Generate();
             product.CreatedAt = _timeProvider.utcDateTime();
-            await _productRepository.CreateAsync(product);
+            await _unitOfWork.ProductRepository.CreateAsync(product);
 
             return response;
         }
@@ -43,7 +43,7 @@ namespace Order.Domain.Services
         {
             var response = new Response();
 
-            var exists = await _productRepository.ExistsByIdAsync(productId);
+            var exists = await _unitOfWork.ProductRepository.ExistsByIdAsync(productId);
 
             if (!exists)
             {
@@ -51,7 +51,7 @@ namespace Order.Domain.Services
                 return response;
             }
 
-            await _productRepository.DeleteAsync(productId);
+            await _unitOfWork.ProductRepository.DeleteAsync(productId);
 
             return response;
         }
@@ -60,7 +60,7 @@ namespace Order.Domain.Services
         {
             var response = new Response<ProductModel>();
 
-            var exists = await _productRepository.ExistsByIdAsync(productId);
+            var exists = await _unitOfWork.ProductRepository.ExistsByIdAsync(productId);
 
             if (!exists)
             {
@@ -68,7 +68,7 @@ namespace Order.Domain.Services
                 return response;
             }
 
-            var data = await _productRepository.GetByIdAsync(productId);
+            var data = await _unitOfWork.ProductRepository.GetByIdAsync(productId);
             response.Data = data;
             return response;
         }
@@ -79,7 +79,7 @@ namespace Order.Domain.Services
 
             if (!string.IsNullOrWhiteSpace(productId))
             {
-                var exists = await _productRepository.ExistsByIdAsync(productId);
+                var exists = await _unitOfWork.ProductRepository.ExistsByIdAsync(productId);
 
                 if (!exists)
                 {
@@ -88,7 +88,7 @@ namespace Order.Domain.Services
                 }
             }
 
-            var data = await _productRepository.ListByFilterAsync(productId, description);
+            var data = await _unitOfWork.ProductRepository.ListByFilterAsync(productId, description);
             response.Data = data;
 
             return response;
@@ -104,7 +104,7 @@ namespace Order.Domain.Services
             if (errors.Report.Count > 0)
                 return errors;
 
-            var exists = await _productRepository.ExistsByIdAsync(product.Id);
+            var exists = await _unitOfWork.ProductRepository.ExistsByIdAsync(product.Id);
 
             if (!exists)
             {
@@ -112,7 +112,7 @@ namespace Order.Domain.Services
                 return response;
             }
 
-            await _productRepository.UpdateAsync(product);
+            await _unitOfWork.ProductRepository.UpdateAsync(product);
 
             return response;
         }

@@ -12,20 +12,20 @@ namespace Order.Domain.Services
 {
     public class UserService : IUserService
     {
-        private readonly IUserRepository _UserRepository;
+        private readonly IUnitOfWork _unitOfWork;
+
         private readonly ITimeProvider _timeProvider;
         private readonly IGenerators _generators;
         private readonly ISecurityService _securityService;
 
-        public UserService(IUserRepository UserRepository,
-                           ITimeProvider timeProvider,
-                           IGenerators generators, 
-                           ISecurityService securityService)
+        public UserService(ITimeProvider timeProvider,
+                           IGenerators generators,
+                           ISecurityService securityService, IUnitOfWork unitOfWork)
         {
-            _UserRepository = UserRepository;
             _timeProvider = timeProvider;
             _generators = generators;
             _securityService = securityService;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<Response<bool>> AutheticationAsync(string password, UserModel user)
@@ -46,7 +46,7 @@ namespace Order.Domain.Services
             user.Id = _generators.Generate();
             user.CreatedAt = _timeProvider.utcDateTime();
 
-            await _UserRepository.CreateAsync(user);
+            await _unitOfWork.UserRepository.CreateAsync(user);
 
             return response;
         }
@@ -55,7 +55,7 @@ namespace Order.Domain.Services
         {
             var response = new Response();
 
-            var exists = await _UserRepository.ExistsByIdAsync(userId);
+            var exists = await _unitOfWork.UserRepository.ExistsByIdAsync(userId);
 
             if (!exists)
             {
@@ -63,7 +63,7 @@ namespace Order.Domain.Services
                 return response;
             }
 
-            await _UserRepository.DeleteAsync(userId);
+            await _unitOfWork.UserRepository.DeleteAsync(userId);
 
             return response;
         }
@@ -72,7 +72,7 @@ namespace Order.Domain.Services
         {
             var response = new Response<UserModel>();
 
-            var exists = await _UserRepository.ExistsByIdAsync(userId);
+            var exists = await _unitOfWork.UserRepository.ExistsByIdAsync(userId);
 
             if (!exists)
             {
@@ -80,7 +80,7 @@ namespace Order.Domain.Services
                 return response;
             }
 
-            var data = await _UserRepository.GetByIdAsync(userId);
+            var data = await _unitOfWork.UserRepository.GetByIdAsync(userId);
             response.Data = data;
             return response;
         }
@@ -89,7 +89,7 @@ namespace Order.Domain.Services
         {
             var response = new Response<UserModel>();
 
-            var exists = await _UserRepository.ExistsByLoginAsync(login);
+            var exists = await _unitOfWork.UserRepository.ExistsByLoginAsync(login);
 
             if (!exists)
             {
@@ -97,7 +97,7 @@ namespace Order.Domain.Services
                 return response;
             }
 
-            var data = await _UserRepository.GetByLoginAsync(login);
+            var data = await _unitOfWork.UserRepository.GetByLoginAsync(login);
             response.Data = data;
             return response;
         }
@@ -108,7 +108,7 @@ namespace Order.Domain.Services
 
             if (!string.IsNullOrWhiteSpace(userId))
             {
-                var exists = await _UserRepository.ExistsByIdAsync(userId);
+                var exists = await _unitOfWork.UserRepository.ExistsByIdAsync(userId);
 
                 if (!exists)
                 {
@@ -117,7 +117,7 @@ namespace Order.Domain.Services
                 }
             }
 
-            var data = await _UserRepository.ListByFilterAsync(userId, name);
+            var data = await _unitOfWork.UserRepository.ListByFilterAsync(userId, name);
             response.Data = data;
 
             return response;
@@ -133,7 +133,7 @@ namespace Order.Domain.Services
             if (errors.Report.Count > 0)
                 return errors;
 
-            var exists = await _UserRepository.ExistsByIdAsync(user.Id);
+            var exists = await _unitOfWork.UserRepository.ExistsByIdAsync(user.Id);
 
             if (!exists)
             {
@@ -141,7 +141,7 @@ namespace Order.Domain.Services
                 return response;
             }
 
-            await _UserRepository.UpdateAsync(user);
+            await _unitOfWork.UserRepository.UpdateAsync(user);
 
             return response;
         }

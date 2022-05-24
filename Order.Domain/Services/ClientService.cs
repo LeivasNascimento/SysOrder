@@ -11,18 +11,15 @@ namespace Order.Domain.Services
 {
     public class ClientService : IClientService
     {
-        private readonly IClientRepository _clientRepository;
         private readonly IUnitOfWork _clientUOW;
 
         public ClientService(IUnitOfWork clientUOW,
                              ITimeProvider timeProvider,
-                             IGenerators generators,
-                             IClientRepository clientRepository)
+                             IGenerators generators)
         {
             _clientUOW = clientUOW;
             _timeProvider = timeProvider;
             _generators = generators;
-            _clientRepository = clientRepository;
         }
 
         private readonly ITimeProvider _timeProvider;
@@ -50,7 +47,7 @@ namespace Order.Domain.Services
         {
             var response = new Response();
 
-            var exists = await _clientRepository.ExistsByIdAsync(clientId);
+            var exists = await _clientUOW.ClientRepository.ExistsByIdAsync(clientId);
 
             if (!exists)
             {
@@ -58,7 +55,7 @@ namespace Order.Domain.Services
                 return response;
             }
 
-            await _clientRepository.DeleteAsync(clientId);
+            await _clientUOW.ClientRepository.DeleteAsync(clientId);
 
             return response;
         }
@@ -67,7 +64,7 @@ namespace Order.Domain.Services
         {
             var response = new Response<ClientModel>();
 
-            var exists = await _clientRepository.ExistsByIdAsync(clientId);
+            var exists = await _clientUOW.ClientRepository.ExistsByIdAsync(clientId);
 
             if (!exists)
             {
@@ -75,7 +72,7 @@ namespace Order.Domain.Services
                 return response;
             }
 
-            var data = await _clientRepository.GetByIdAsync(clientId);
+            var data = await _clientUOW.ClientRepository.GetByIdAsync(clientId);
             response.Data = data;
             return response;
         }
@@ -86,7 +83,7 @@ namespace Order.Domain.Services
 
             if (!string.IsNullOrWhiteSpace(clientId))
             {
-                var exists = await _clientRepository.ExistsByIdAsync(clientId);
+                var exists = await _clientUOW.ClientRepository.ExistsByIdAsync(clientId);
 
                 if (!exists)
                 {
@@ -95,7 +92,7 @@ namespace Order.Domain.Services
                 }
             }
 
-            var data = await _clientRepository.ListByFilterAsync(clientId, name);
+            var data = await _clientUOW.ClientRepository.ListByFilterAsync(clientId, name);
             response.Data = data;
 
             return response;
@@ -111,7 +108,7 @@ namespace Order.Domain.Services
             if (errors.Report.Count > 0)
                 return errors;
 
-            var exists = await _clientRepository.ExistsByIdAsync(client.Id);
+            var exists = await _clientUOW.ClientRepository.ExistsByIdAsync(client.Id);
 
             if (!exists)
             {
@@ -119,7 +116,7 @@ namespace Order.Domain.Services
                 return response;
             }
 
-            await _clientRepository.UpdateAsync(client);
+            await _clientUOW.ClientRepository.UpdateAsync(client);
 
             return response;
         }
