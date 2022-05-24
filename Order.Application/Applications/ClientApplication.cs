@@ -32,9 +32,16 @@ namespace Order.Application.Applications
             throw new System.NotImplementedException();
         }
 
-        public Task<Response<ClientResponse>> GetByIdAsync(string clientId)
+        public async Task<Response<ClientResponse>> GetByIdAsync(string clientId)
         {
-            throw new System.NotImplementedException();
+            Response<ClientModel> client = await _clientService.GetByIdAsync(clientId);
+
+            if (client.Report.Any())
+                return Response.Unprocessable<ClientResponse>(client.Report);
+
+            var response = _mapper.Map<ClientResponse>(client.Data);
+
+            return Response.OK(response);
         }
 
         public async Task<Response<List<ClientResponse>>> ListByFilterAsync(string clientId, string name)

@@ -4,6 +4,7 @@ using Order.Domain.Interfaces.Services;
 using Order.Domain.Models;
 using Order.Domain.Validations;
 using Order.Domain.Validations.Base;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -28,19 +29,30 @@ namespace Order.Domain.Services
         public async Task<Response> CreateAsync(ClientModel client)
         {
             var response = new Response();
+            _clientUOW.BeginTransaction();
 
-            var validation = new ClientValidation();
-            var errors = validation.Validate(client).GetErrors();
+            try
+            {
+                var validation = new ClientValidation();
+                var errors = validation.Validate(client).GetErrors();
 
-            if (errors.Report.Count > 0)
-                return errors;
+                if (errors.Report.Count > 0)
+                    return errors;
 
-            client.Id = _generators.Generate();
-            client.CreatedAt = _timeProvider.utcDateTime();
+                client.Id = _generators.Generate();
+                client.CreatedAt = _timeProvider.utcDateTime();
 
-            await _clientUOW.ClientRepository.CreateAsync(client);
+                await _clientUOW.ClientRepository.CreateAsync(client);
 
-            return response;
+                _clientUOW.CommitTransaction();
+
+                return response;
+            }
+            catch (Exception ex)
+            {
+                _clientUOW.RollbackTransaction();
+                return response;
+            }
         }
 
         public async Task<Response> DeleteAsync(string clientId)
@@ -80,22 +92,31 @@ namespace Order.Domain.Services
         public async Task<Response<List<ClientModel>>> ListByFiltersAsync(string clientId = null, string name = null)
         {
             var response = new Response<List<ClientModel>>();
+            _clientUOW.BeginTransaction();
 
-            if (!string.IsNullOrWhiteSpace(clientId))
+            try
             {
-                var exists = await _clientUOW.ClientRepository.ExistsByIdAsync(clientId);
-
-                if (!exists)
+                if (!string.IsNullOrWhiteSpace(clientId))
                 {
-                    response.Report.Add(Report.Create($"Client {clientId} not exists!"));
-                    return response;
+                    var exists = await _clientUOW.ClientRepository.ExistsByIdAsync(clientId);
+
+                    if (!exists)
+                    {
+                        response.Report.Add(Report.Create($"Client {clientId} not exists!"));
+                        return response;
+                    }
                 }
+
+                var data = await _clientUOW.ClientRepository.ListByFilterAsync(clientId, name);
+                response.Data = data;
+
+                return response;
             }
-
-            var data = await _clientUOW.ClientRepository.ListByFilterAsync(clientId, name);
-            response.Data = data;
-
-            return response;
+            catch (System.Exception ex)
+            {
+                _clientUOW.RollbackTransaction();
+                return response;
+            }
         }
 
         public async Task<Response> UpdateAsync(ClientModel client)
